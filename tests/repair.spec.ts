@@ -86,11 +86,12 @@ test('service worker update keeps only the current offline cache', async ({ brow
   await context.close();
 });
 
-test('workspace text can resize to 200% without horizontal loss', async ({ page }) => {
+test('all routes can resize text to 200% without horizontal loss', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/demo');
-  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Download Markdown' })).toBeVisible();
+  for (const route of ['/', '/app', '/demo', '/privacy', '/terms', '/qa-missing']) {
+    await page.goto(route);
+    await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth), route).toBeLessThanOrEqual(390);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  }
 });
