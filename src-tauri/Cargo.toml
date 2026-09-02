@@ -1,6 +1,6 @@
 [package]
 name = "spoken-dev-brief"
-version = "0.1.2"
+version = "0.1.3"
 description = "Local-first spoken engineering decision recorder"
 authors = ["Param Factory"]
 edition = "2021"
