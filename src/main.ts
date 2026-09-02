@@ -17,10 +17,8 @@ const isDemo = () => route() === '/demo' || new URLSearchParams(location.search)
 const store = () => new LocalStore(isDemo());
 
 function focusRouteHeading(scrollX = 0, scrollY = 0) {
-  requestAnimationFrame(() => {
-    scrollTo(scrollX, scrollY);
-    document.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });
-  });
+  document.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });
+  requestAnimationFrame(() => scrollTo(scrollX, scrollY));
 }
 
 function navigate(path: string) {
