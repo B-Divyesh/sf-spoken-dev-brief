@@ -48,9 +48,9 @@ function shell(content: string, title: string, description: string) {
     </header>
     ${isDemo() ? `<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, nothing is saved</strong><span><button class="text-button" data-action="reset-demo">Reset demo</button><button class="text-button" data-action="start-real">Start for real</button></span></aside>` : ''}
     <main id="main">${content}</main>
-    <div class="sr-only" aria-live="polite" id="route-status">${escapeHtml(title)}</div>
+    <div class="sr-only" aria-live="polite" id="route-status"></div>
     <div class="toast ${flash ? 'is-visible' : ''}" role="status">${escapeHtml(flash)}</div>
-    <footer><div><a class="wordmark route-link" href="/">Spoken Dev Brief</a><p>Confirmed engineering decisions from spoken work.</p></div><div class="footer-links"><a class="route-link" href="/privacy">Privacy</a><a class="route-link" href="/terms">Terms</a><a href="https://hello-factory.sociobot.in" rel="noreferrer">Built by Param Factory <span class="sr-only">(external)</span></a><span>v0.1.0</span></div><p class="generated-note">Poster artwork was generated for this product.</p></footer>`;
+    <footer><div><a class="wordmark route-link" href="/">Spoken Dev Brief</a><p>Confirmed engineering decisions from spoken work.</p></div><div class="footer-links"><a class="route-link" href="/privacy">Privacy</a><a class="route-link" href="/terms">Terms</a><a href="https://hello-factory.sociobot.in" rel="noreferrer">Built by Param Factory <span class="sr-only">(external)</span></a><span>v0.1.1</span></div><p class="generated-note">Poster artwork was generated for this product.</p></footer>`;
 }
 
 function landing() {
@@ -132,6 +132,7 @@ function render() {
   const path = route();
   app.innerHTML = path === '/' ? landing() : path === '/demo' || path === '/app' ? appView() : path === '/privacy' ? policyPage('privacy') : path === '/terms' ? policyPage('terms') : notFound();
   bindEvents();
+  requestAnimationFrame(() => { const status = document.querySelector('#route-status'); if (status) status.textContent = document.title; });
   if (path === '/') void resolveDownload();
 }
 

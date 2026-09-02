@@ -57,3 +57,31 @@ test('the 320px demo does not scroll sideways', async ({ page }) => {
   await page.goto('/demo');
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
+
+test('keyboard-only confirmation enables export', async ({ page }) => {
+  await page.goto('/demo');
+  await page.getByLabel('I checked this brief against the recording.').focus();
+  await page.keyboard.press('Space');
+  await page.getByRole('button', { name: 'Confirm brief' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('button', { name: 'Download Markdown' })).toBeEnabled();
+  await page.getByRole('button', { name: 'Download Markdown' }).focus();
+  const download = page.waitForEvent('download');
+  await page.keyboard.press('Enter');
+  await download;
+});
+
+test('service worker update keeps only the current offline cache', async ({ browser }) => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto('/demo');
+  const state = await page.evaluate(async () => {
+    const registration = await navigator.serviceWorker.ready;
+    await registration.update();
+    return { active: registration.active?.state, caches: await caches.keys() };
+  });
+  expect(state.active).toBe('activated');
+  expect(state.caches).toContain('spoken-dev-brief-v2');
+  expect(state.caches).not.toContain('spoken-dev-brief-v1');
+  await context.close();
+});
