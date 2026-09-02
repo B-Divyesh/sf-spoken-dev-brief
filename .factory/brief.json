@@ -1,0 +1,8 @@
+{
+  "slug": "spoken-dev-brief",
+  "title": "Spoken Dev Brief",
+  "summary": "Turn spoken implementation decisions into confirmed, code-linked briefs.",
+  "artifact_class": "desktop-app",
+  "price": "$12/user/month",
+  "data_policy": "Local-first; recordings and briefs stay on the device by default."
+}
