@@ -39,6 +39,7 @@ jobs:
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CI: true
         with:
           tagName: ${{ github.ref_name }}
           releaseName: Spoken Dev Brief ${{ github.ref_name }}
