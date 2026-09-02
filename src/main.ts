@@ -48,7 +48,7 @@ function shell(content: string, title: string, description: string) {
     <main id="main">${content}</main>
     <div class="sr-only" aria-live="polite" id="route-status"></div>
     <div class="toast ${flash ? 'is-visible' : ''}" role="status">${escapeHtml(flash)}</div>
-    <footer><div><a class="wordmark route-link" href="/">Spoken Dev Brief</a><p>Confirmed engineering decisions from spoken work.</p></div><div class="footer-links"><a class="route-link" href="/privacy">Privacy</a><a class="route-link" href="/terms">Terms</a><a href="https://hello-factory.sociobot.in" rel="noreferrer">Built by Param Factory <span class="sr-only">(external)</span></a><span>v0.1.1</span></div><p class="generated-note">Poster artwork was generated for this product.</p></footer>`;
+    <footer><div><a class="wordmark route-link" href="/">Spoken Dev Brief</a><p>Confirmed engineering decisions from spoken work.</p></div><div class="footer-links"><a class="route-link" href="/privacy">Privacy</a><a class="route-link" href="/terms">Terms</a><a href="https://hello-factory.sociobot.in" rel="noreferrer">Built by Param Factory <span class="sr-only">(external)</span></a><span>v0.1.2</span></div><p class="generated-note">Poster artwork was generated for this product.</p></footer>`;
 }
 
 function landing() {
