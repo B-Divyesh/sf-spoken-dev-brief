@@ -33,9 +33,13 @@ Verification on 2026-09-02:
 - Chromium console: no page-load errors.
 - `cargo check`: passed after installing the Linux Tauri prerequisites.
 - `cargo test --lib`: 1 native audio-pipeline test passed.
+- Native package command: `CI=true npm run tauri build -- --debug --no-bundle` passed locally.
 - `npm audit --omit=dev`: 0 vulnerabilities.
 - Production site bundle: 10.36 KB initial JS gzip and 4.43 KB CSS gzip. Largest hero is 159 KB WebP.
 - Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100. LCP 1.5 s, CLS 0, TBT 20 ms.
+- GitHub Actions run `33587827929`: all four build jobs and the manifest job passed.
+- Release: `https://github.com/B-Divyesh/sf-spoken-dev-brief/releases/tag/v0.1.0`.
+- Release verification: downloaded the 74 MB amd64 deb, matched it against `SHA256SUMS`, and parsed `latest.json` successfully.
 
 ## Known gaps
 
