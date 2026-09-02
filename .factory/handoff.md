@@ -2,7 +2,7 @@
 
 ## Status
 
-Release-blocking findings from independent verifier commit `00edaff22a38b039c73f00e823fe4a2a433327e2` are repaired on `main`. The repaired static site is deployed at <https://spoken-dev-brief.sociobot.in>. Desktop release `v0.1.4` contains the final repair.
+Release-blocking findings from independent verifier commit `00edaff22a38b039c73f00e823fe4a2a433327e2` are repaired on `main`. The repaired static site is deployed at <https://spoken-dev-brief.sociobot.in>. Desktop release `v0.1.4` is built from commit `23d16ec26f0780ceb82e8f89d44e0b77b235f11f`.
 
 ## Repairs
 
@@ -39,20 +39,23 @@ CI=true npm run tauri build    # Linux desktop packages produced
 
 Production site output is 33.77 KB JS (11.67 KB gzip), 2.48 KB lazy JS (1.01 KB gzip), and 18.02 KB CSS (4.75 KB gzip). This is below the product budgets.
 
-The local package check produced a 74,084,168-byte `.deb`, 74,086,812-byte `.rpm`, and 148,785,656-byte AppImage. The extracted `.deb` contains the application, desktop entry, icons, and 77,704,715-byte Whisper model. Its model SHA-256 matches the source (`921e4cf8686fdd993dcd081a5da5b6c365bfde1162e72b08d75ac75289920b1f`). An extracted-package launch under Xvfb stayed running for the 12-second smoke window with no application error output.
+The final [v0.1.4 release](https://github.com/B-Divyesh/sf-spoken-dev-brief/releases/tag/v0.1.4) completed successfully in [Actions run 33598686924](https://github.com/B-Divyesh/sf-spoken-dev-brief/actions/runs/33598686924). It contains macOS arm64/x64 DMGs, Windows EXE/MSI installers, Linux AppImage/DEB/RPM packages, app archives, `SHA256SUMS`, and `latest.json`. The manifest lists every supported platform. A fresh download of the 70,692,370-byte Windows EXE passed its published SHA-256 check; evidence is in `/tmp/spoken-v014-release.ELxERN`.
+
+A local Linux packaging preflight produced DEB, RPM, and AppImage bundles. The extracted DEB contains the application, desktop entry, icons, and 77,704,715-byte Whisper model. Its model SHA-256 matches the source (`921e4cf8686fdd993dcd081a5da5b6c365bfde1162e72b08d75ac75289920b1f`). An extracted-package launch under Xvfb stayed running for the 12-second smoke window with no application error output. A live landing-page consumer check resolved Linux to the real v0.1.4 AppImage URL.
 
 Browser coverage includes desktop and 390 px mobile, a 320 px overflow check, 200% text, keyboard-only confirmation/export, touch targets, all routes through Axe, offline reload and cache replacement, malformed storage, Back/Forward focus, canonical changes, a real 404, privacy request capture, and checkout unavailability. All six tested live routes have zero serious or critical Axe violations.
 
-`/opt/fleet/lib/verify-url.sh https://spoken-dev-brief.sociobot.in` passed with HTTP 200, title, `lang=en`, one `<h1>`, `<main>`, image alt text, labeled buttons, and no console errors. Evidence directory: `/tmp/spoken-v013-live.UQF0NJ`.
+`/opt/fleet/lib/verify-url.sh https://spoken-dev-brief.sociobot.in` passed with HTTP 200, title, `lang=en`, one `<h1>`, `<main>`, image alt text, labeled buttons, and no console errors. Evidence directory: `/tmp/spoken-v014-live.0EDsRX`.
 
 Live deployment identity:
 
-- `index.html` SHA-256: `e7815dd54033232697d65bf331873cd8827e6a046ddaf4cb3cc51ebeb0775a73`
-- `assets/index-DyFD_ZJF.js` SHA-256: `f9fe78302abb287b4cb0f01e2fc7f6a96d8d962e9c243ab2998e7ec4fad940c3`
+- `index.html` SHA-256: `472b9fd0da4f7e3374c6043836688a9df65c56a94716fe946c157fe5d387fd62`
+- `assets/index-BdHvoTdX.js` SHA-256: `2a98077edadb3691ef579e4b147dd0cba8a0c186d56f212e87629df4d1080186`
+- `assets/index-By8IkWWK.css` SHA-256: `faf166e48dc4d9fafe4c6e66d6fc854fc4b52c72ae6020881ea02849f0ac3ddb`
 - `/qa-missing`: HTTP 404
 - hashed JS cache policy: `public, max-age=31536000, immutable`
 
-Lighthouse mobile from the final repair line: Performance 99, Accessibility 100, Best Practices 100, SEO 100; FCP 1.279 s, LCP 2.119 s, TBT 21 ms, CLS 0.
+Final live Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 0.911 s, LCP 1.752 s, TBT 25 ms, CLS 0. Evidence: `/tmp/spoken-v014-lighthouse.json`.
 
 ## Demo and privacy
 
