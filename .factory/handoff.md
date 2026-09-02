@@ -1,60 +1,49 @@
-# Spoken Dev Brief handoff
+# Spoken Dev Brief verification handoff
 
-## What was built
+## Status
 
-- Tauri 2 desktop app with explicit consent, microphone-to-WAV capture, packaged Whisper `tiny.en` transcription, and no audio upload.
-- Local brief drafting that separates decisions, assumptions, and open questions.
-- Human review, named ownership, repository references, confirmation, Markdown download, and Jira-formatted clipboard export.
-- Local retention settings, immediate deletion, and a manual transcript fallback.
-- Isolated `/demo` with realistic sample data, reset/exit controls, its own storage namespace, and offline reload.
-- Art-deco transit-poster design, original generated hero art, three real UI walkthrough frames, responsive 390 px layout, and reduced-motion behavior.
-- `/privacy`, `/terms`, in-app 404, metadata, social card, sitemap, robots, service worker, CSP, and security headers.
-- $12/user/month Pro offer with hosted Sociobot checkout, license capture, daily verification cache, and paste-to-restore.
-- GitHub Actions release matrix for macOS arm64/x64, Windows x64, Linux AppImage/deb, checksums, and `latest.json`.
+**FAIL — do not release candidate `6d05bbe384d77345c8bdd65f971cfece2016fdf2`.**
 
-## Run and verify
+Independent QA was performed on 2026-09-02 against the clean candidate checkout and <https://spoken-dev-brief.sociobot.in>. The live deployment's product code matches the candidate. Full evidence is in [verification.md](verification.md).
+
+## Release blockers
+
+1. The live `Buy Pro` action returns HTTP 404, so the advertised `$12 / user / month` subscription cannot be purchased.
+2. Markdown and Jira exports work while the brief is still a draft, bypassing the required human-confirmation gate.
+3. A representative transcript containing two repository paths and a named owner produced no references and `Unassigned`, so the proposed brief is neither code-linked nor attributable.
+4. The claims inventory is incomplete. The Pro test never follows its dead checkout link; the native transcription claim only tests resampling and has no matching `@claim` tag; several published privacy and non-goal statements are unlisted.
+
+Additional medium findings: malformed saved JSON crashes the app before recovery controls render; several mobile links are below the 44 px touch-target minimum; Back/Forward does not restore focus; non-home routes retain the home canonical URL; missing pages return HTTP 200; hashed production assets receive only 30-second caching.
+
+## What passed
+
+- First-read gate and one-click isolated sample demo.
+- All declared claim commands after installing dependencies, plus the aggregate unit/integration suite.
+- TypeScript, production site/app builds, Rust tests, strict Clippy, and a full Tauri Linux bundle build. Rust formatting is the one static-analysis failure.
+- Normal transcript, editing, confirmation, export, retention, deletion, consent, browser fallback, and offline demo flows.
+- No clean-load console/page errors, no axe violations, visible keyboard focus, reduced motion, and responsive use at 390 px.
+- Privacy request inspection, security headers, and product verification throttling: 30 requests were allowed; request 31 returned 429 with `Retry-After: 3`.
+- Lighthouse mobile: Performance 99, Accessibility 100, Best Practices 100, SEO 100; LCP 1.285 s, CLS 0.
+- Candidate/live static hashes, GitHub release manifest, published checksum, deb contents, installation, and headless launch smoke test.
+
+## Reproduce
 
 ```sh
-npm install
+npm ci
 npm test
 npm run build
 npm run build:app
-cargo check --manifest-path src-tauri/Cargo.toml
-cargo test --manifest-path src-tauri/Cargo.toml --lib
+npx tsc --noEmit
+cargo test --manifest-path src-tauri/Cargo.toml
+cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+cargo fmt --manifest-path src-tauri/Cargo.toml --check
 ```
 
-The static deploy root is `dist/site/`; its `index.html` is present at that root. The Tauri UI is `dist/app/`.
+The final command currently fails. Building Tauri packages on Debian also requires the Linux prerequisites from the release workflow, the `file` utility, and the packaged model resource.
 
-Verification on 2026-09-02:
+## Scope notes
 
-- `npm test`: 2 Vitest tests and 15 Playwright tests passed.
-- Every command in `.factory/claims.json` is covered by its tagged test.
-- Playwright axe: no serious or critical issues on `/`, `/demo`, `/privacy`, or `/terms`.
-- Chromium console: no page-load errors.
-- `cargo check`: passed after installing the Linux Tauri prerequisites.
-- `cargo test --lib`: 1 native audio-pipeline test passed.
-- Native package command: `CI=true npm run tauri build -- --debug --no-bundle` passed locally.
-- `npm audit --omit=dev`: 0 vulnerabilities.
-- Production site bundle: 10.36 KB initial JS gzip and 4.43 KB CSS gzip. Largest hero is 159 KB WebP.
-- Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100. LCP 1.5 s, CLS 0, TBT 20 ms.
-- GitHub Actions run `33587827929`: all four build jobs and the manifest job passed.
-- Release: `https://github.com/B-Divyesh/sf-spoken-dev-brief/releases/tag/v0.1.0`.
-- Release verification: downloaded the 74 MB amd64 deb, matched it against `SHA256SUMS`, and parsed `latest.json` successfully.
-
-## Known gaps
-
-- Automated tests use text fixtures and synthetic audio. A release smoke test should still record a human voice on each operating system.
-- English is the only packaged transcription model in v0.1.
-- The deterministic local draft works without a key but may need more editing than a model-generated summary.
-- Release packages are unsigned until the operator adds platform certificates.
-
-## Needs operator action
-
-- Add Apple signing/notarization secrets before a signed release: `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`, and `APPLE_TEAM_ID`.
-- Add the Windows Authenticode certificate secrets before a signed release: `WINDOWS_CERT_PFX` and `WINDOWS_CERT_PASSWORD`, then import that certificate in the workflow.
-- Register `spoken-dev-brief` with the Sociobot billing service and set its live return URL. No product ID is hardcoded.
-- Submit a live microphone smoke test after the first release assets finish publishing.
-
-## Asset provenance
-
-The hero was generated with the factory image model from the prompt in `.factory/design.md`. Source, prompt sidecars, optimized WebP variants, and the derived social card are committed. Walkthrough images are screenshots of the shipped demo UI.
+- No product code was changed during verification.
+- No resources outside this product's public site, public repository/release, and product-scoped Sociobot billing endpoints were accessed.
+- No backend persistence or sign-in exists, so `/data`, concurrency, and Entra checks do not apply.
+- Human microphone transcription still needs a real-device smoke test on each supported operating system after the release blockers are fixed.
