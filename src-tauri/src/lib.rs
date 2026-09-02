@@ -43,5 +43,5 @@ pub fn run() {
 mod tests {
     use super::resample;
     #[test]
-    fn resamples_audio_length() { assert_eq!(resample(&vec![0.0; 48_000], 48_000, 16_000).len(), 16_000); }
+    fn local_audio_pipeline() { assert_eq!(resample(&vec![0.0; 48_000], 48_000, 16_000).len(), 16_000); }
 }

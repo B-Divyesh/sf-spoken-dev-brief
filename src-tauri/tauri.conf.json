@@ -19,7 +19,7 @@
     "category": "DeveloperTool",
     "shortDescription": "Turn spoken decisions into confirmed engineering briefs.",
     "longDescription": "Record selected implementation talk, transcribe it locally, review claims and code references, then export a confirmed brief.",
-    "resources": { "resources/models/ggml-tiny.en.bin": "models/ggml-tiny.en.bin" },
+    "resources": ["resources/models/*"],
     "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
     "macOS": { "minimumSystemVersion": "10.15", "infoPlist": "Info.plist" }
   }
