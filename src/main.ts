@@ -188,7 +188,7 @@ async function resolveDownload() {
 }
 
 captureLicense();
-if (import.meta.env.VITE_DESKTOP === '1' && route() === '/') history.replaceState({}, '', '/app');
+if (import.meta.env.MODE === 'desktop' && route() === '/') history.replaceState({}, '', '/app');
 window.addEventListener('popstate', render);
 document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && route() === '/app') { e.preventDefault(); void handleAction('draft', document.body); } });
 render();

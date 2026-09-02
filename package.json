@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "npm run build:site",
     "build:site": "vite build --outDir dist/site",
-    "build:app": "VITE_DESKTOP=1 vite build --outDir dist/app",
+    "build:app": "vite build --mode desktop --outDir dist/app",
     "tauri": "tauri",
     "test": "vitest run && playwright test",
     "test:unit": "vitest run",
