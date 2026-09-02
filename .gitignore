@@ -4,3 +4,11 @@ dist/
 *.log
 graphify-out/
 .DS_Store
+node_modules/
+dist/
+target/
+src-tauri/target/
+src-tauri/resources/models/*.bin
+test-results/
+playwright-report/
+.DS_Store

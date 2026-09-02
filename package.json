@@ -1,0 +1,29 @@
+{
+  "name": "spoken-dev-brief",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:site",
+    "build:site": "vite build --outDir dist/site",
+    "build:app": "VITE_DESKTOP=1 vite build --outDir dist/app",
+    "tauri": "tauri",
+    "test": "vitest run && playwright test",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "preview": "vite preview --host 127.0.0.1 --outDir dist/site"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "2.8.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.10.2",
+    "@playwright/test": "1.58.2",
+    "@tauri-apps/cli": "2.8.4",
+    "@types/node": "^24.3.0",
+    "typescript": "5.9.2",
+    "vite": "^7.3.6",
+    "vitest": "^3.2.7"
+  }
+}
