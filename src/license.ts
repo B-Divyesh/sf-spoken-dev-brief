@@ -27,7 +27,8 @@ export function cachedLicensed(): boolean {
 export async function verifyLicense(): Promise<boolean> {
   const token = localStorage.getItem(TOKEN_KEY);
   if (!token) return false;
-  const old = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}') as { valid?: boolean; checkedAt?: number };
+  let old: { valid?: boolean; checkedAt?: number } = {};
+  try { old = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch { localStorage.removeItem(CACHE_KEY); }
   if (old.checkedAt && Date.now() - old.checkedAt < 86_400_000) return old.valid === true;
   try {
     const response = await fetch(`${API}/products/${SLUG}/verify?license=${encodeURIComponent(token)}`);

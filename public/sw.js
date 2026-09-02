@@ -1,5 +1,5 @@
-const CACHE = 'spoken-dev-brief-v1';
-const SHELL = ['/', '/demo', '/privacy', '/terms', '/favicon.svg', '/assets/hero-768.webp', '/assets/hero-1536.webp'];
+const CACHE = 'spoken-dev-brief-v2';
+const SHELL = ['/', '/app', '/demo', '/privacy', '/terms', '/favicon.svg', '/assets/hero-768-15251fb1.webp', '/assets/hero-1536-25417cfa.webp'];
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting())));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', event => {

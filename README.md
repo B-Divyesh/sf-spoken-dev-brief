@@ -2,7 +2,7 @@
 
 Turn spoken implementation decisions into confirmed, code-linked briefs.
 
-Spoken Dev Brief is a local-first desktop recorder for small distributed product teams. It captures selected speech with explicit consent, transcribes it with a packaged Whisper model, separates decisions from assumptions and questions, and requires human confirmation. Confirmed briefs download as Markdown or copy as Jira text.
+Spoken Dev Brief is a local-first desktop recorder for small distributed product teams. It captures selected speech with explicit consent and transcribes it with a packaged Whisper model. It separates decisions, assumptions, questions, owners, and repository paths. A person must confirm each brief before either export works.
 
 Try the isolated sample at <https://spoken-dev-brief.sociobot.in/demo>. It uses only `demo:spoken-dev-brief:*` browser keys and never reads real data. The demo works offline after its first visit.
 
@@ -17,7 +17,7 @@ Try the isolated sample at <https://spoken-dev-brief.sociobot.in/demo>. It uses 
 - Configurable local retention and immediate deletion.
 - A static download site with an isolated, one-click demo.
 
-The free tier includes manual transcripts, review, code links, and export. Pro is $12 per user each month. It includes packaged local transcription model updates and integration updates. Billing and license verification use the Sociobot billing API.
+The free tier includes manual transcripts, review, code links, and export. Pro is listed at $12 per user each month. New checkout is unavailable until the operator registers this product with Sociobot. Existing license verification uses the product-scoped Sociobot endpoint.
 
 ## Develop
 
@@ -40,7 +40,11 @@ npm run tauri dev
 
 ```sh
 npm test
+npm run test:native
+npm run typecheck
+npm run lint
 npm run build
+npm run build:app
 ```
 
 `npm run build` writes the deployable static site to `dist/site/`. `npm run build:app` builds the Tauri webview UI to `dist/app/`. Claim contracts live in [.factory/claims.json](.factory/claims.json).
@@ -48,6 +52,16 @@ npm run build
 ## Release
 
 Push a `v*` tag or run the Release desktop app workflow. GitHub Actions builds macOS arm64 and x64 packages, Windows x64 packages, and Linux AppImage/deb packages. It attaches checksums and `latest.json` to the GitHub Release. Version 0.1 packages are unsigned.
+
+The release page detects your platform. These checksum-verifying installers save the matching package in your Downloads folder:
+
+```sh
+curl -fsSL https://spoken-dev-brief.sociobot.in/install.sh | sh
+```
+
+```powershell
+irm https://spoken-dev-brief.sociobot.in/install.ps1 | iex
+```
 
 ## Privacy
 

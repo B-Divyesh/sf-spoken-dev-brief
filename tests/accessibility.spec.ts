@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-for (const path of ['/', '/demo', '/privacy', '/terms']) test(`accessibility baseline ${path}`, async ({ page }) => {
+for (const path of ['/', '/app', '/demo', '/privacy', '/terms', '/qa-missing']) test(`accessibility baseline ${path}`, async ({ page }) => {
   await page.goto(path); await expect(page.locator('h1')).toHaveCount(1);
   const results = await new AxeBuilder({ page: page as never }).analyze(); expect(results.violations.filter(v => ['serious', 'critical'].includes(v.impact || ''))).toEqual([]);
 });

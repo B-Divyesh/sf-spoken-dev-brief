@@ -9,21 +9,36 @@ declare global { interface Window { __TAURI_INTERNALS__?: unknown } }
 const app = document.querySelector<HTMLDivElement>('#app')!;
 let recorder: LocalRecorder | null = null;
 let flash = '';
+const siteOrigin = 'https://spoken-dev-brief.sociobot.in';
 
 const escapeHtml = (value: string) => value.replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]!));
 const route = () => location.pathname.replace(/\/$/, '') || '/';
 const isDemo = () => route() === '/demo' || new URLSearchParams(location.search).get('demo') === '1';
 const store = () => new LocalStore(isDemo());
 
+function focusRouteHeading(scrollX = 0, scrollY = 0) {
+  requestAnimationFrame(() => {
+    scrollTo(scrollX, scrollY);
+    document.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });
+  });
+}
+
 function navigate(path: string) {
-  history.pushState({}, '', path);
+  history.replaceState({ ...history.state, scrollX, scrollY }, '');
+  history.pushState({ scrollX: 0, scrollY: 0 }, '', path);
   render();
-  requestAnimationFrame(() => document.querySelector<HTMLElement>('h1')?.focus());
+  const hash = new URL(location.href).hash;
+  if (hash) requestAnimationFrame(() => document.querySelector<HTMLElement>(hash)?.scrollIntoView());
+  focusRouteHeading();
 }
 
 function shell(content: string, title: string, description: string) {
   document.title = title;
   document.querySelector('meta[name="description"]')?.setAttribute('content', description);
+  document.querySelector('meta[property="og:title"]')?.setAttribute('content', title);
+  document.querySelector('meta[property="og:description"]')?.setAttribute('content', description);
+  document.querySelector('meta[property="og:url"]')?.setAttribute('content', new URL(route(), siteOrigin).href);
+  document.querySelector('link[rel="canonical"]')?.setAttribute('href', new URL(route(), siteOrigin).href);
   return `
     <header class="site-header">
       <nav class="nav-wrap" aria-label="Main navigation">
@@ -48,16 +63,16 @@ function landing() {
         <div class="hero-actions"><a class="button primary route-link" href="/demo">Try it with sample data</a><span>Opens a filled brief you can review and export.</span></div>
         <ul class="plain-facts"><li>Audio stays on your device.</li><li>Works without an account.</li><li>Free core tools. Pro costs $12/user/month.</li></ul>
       </div>
-      <figure class="hero-art"><picture><source type="image/webp" srcset="/assets/hero-768.webp 768w, /assets/hero-1536.webp 1536w" sizes="(max-width: 760px) 100vw, 48vw"><img src="/assets/hero-1536.webp" width="1536" height="1024" alt="A microphone waveform becomes rails leading to an engineering brief." fetchpriority="high" decoding="async"></picture><figcaption>From spoken thread to confirmed record.</figcaption></figure>
+      <figure class="hero-art"><picture><source type="image/webp" srcset="/assets/hero-768-15251fb1.webp 768w, /assets/hero-1536-25417cfa.webp 1536w" sizes="(max-width: 760px) 100vw, 48vw"><img src="/assets/hero-1536-25417cfa.webp" width="1536" height="1024" alt="A microphone waveform becomes rails leading to an engineering brief." fetchpriority="high" decoding="async"></picture><figcaption>A spoken discussion becomes a confirmed record.</figcaption></figure>
     </section>
     <section class="live-preview" aria-labelledby="preview-heading">
-      <div class="section-heading"><p class="eyebrow">A finished brief</p><h2 id="preview-heading">Review each claim before it travels</h2><p>The draft separates decisions, assumptions, questions, and repository paths.</p></div>
+      <div class="section-heading"><p class="eyebrow">A finished brief</p><h2 id="preview-heading">Review the draft before exporting</h2><p>The draft separates decisions, assumptions, questions, and repository paths.</p></div>
       <article class="paper-preview"><div class="preview-meta"><span>Draft 04</span><span>Owner: Maya Chen</span></div><h3>Keep sync retries capped at three attempts</h3><dl><div><dt>Decision</dt><dd>Keep the retry policy capped at three attempts.</dd></div><div><dt>Assumption</dt><dd>The API returns Retry-After in seconds.</dd></div><div><dt>Code</dt><dd><code>src/lib/sync.ts:48</code></dd></div></dl><span class="stamp">Needs confirmation</span></article>
     </section>
-    <section class="how" id="how" aria-labelledby="how-title"><div class="section-heading"><p class="eyebrow">How it works</p><h2 id="how-title">Move from voice to a checked record</h2></div><ol class="route-steps"><li><span>01</span><h3>Record with consent</h3><p>Mark consent, then capture only the implementation discussion you need.</p><figure><img src="/assets/walkthrough-capture.webp" width="390" height="777" loading="lazy" decoding="async" alt="The capture panel with consent, recording, and transcript controls."><figcaption>Capture only after consent.</figcaption></figure></li><li><span>02</span><h3>Review the draft</h3><p>Edit decisions, assumptions, questions, owners, and repository paths.</p><figure><img src="/assets/walkthrough-review.webp" width="700" height="650" loading="lazy" decoding="async" alt="A draft brief with editable decisions and an owner."><figcaption>Every claim stays editable.</figcaption></figure></li><li><span>03</span><h3>Confirm and export</h3><p>Confirm the record, then download Markdown or copy Jira text.</p><figure><img src="/assets/walkthrough-export.webp" width="700" height="500" loading="lazy" decoding="async" alt="A confirmed brief with Markdown and Jira export buttons."><figcaption>Export only after review.</figcaption></figure></li></ol></section>
+    <section class="how" id="how" aria-labelledby="how-title"><div class="section-heading"><p class="eyebrow">How it works</p><h2 id="how-title">Create a checked record in three steps</h2></div><ol class="route-steps"><li><span>01</span><h3>Record with consent</h3><p>Mark consent, then capture only the implementation discussion you need.</p><figure><img src="/assets/walkthrough-capture-b52b5880.webp" width="390" height="777" loading="lazy" decoding="async" alt="The capture panel with consent, recording, and transcript controls."><figcaption>Capture only after consent.</figcaption></figure></li><li><span>02</span><h3>Review the draft</h3><p>Edit decisions, assumptions, questions, owners, and repository paths.</p><figure><img src="/assets/walkthrough-review-3bd032b9.webp" width="700" height="650" loading="lazy" decoding="async" alt="A draft brief with editable decisions and an owner."><figcaption>Every item stays editable.</figcaption></figure></li><li><span>03</span><h3>Confirm and export</h3><p>Confirm the record, then download Markdown or copy Jira text.</p><figure><img src="/assets/walkthrough-export-58746b77.webp" width="700" height="500" loading="lazy" decoding="async" alt="A confirmed brief with Markdown and Jira export buttons."><figcaption>Export only after review.</figcaption></figure></li></ol></section>
     <section class="privacy-block" aria-labelledby="privacy-title"><div><p class="eyebrow">Clear limits</p><h2 id="privacy-title">A recorder, not a meeting bot</h2></div><ul><li>It does not join calls or record in secret.</li><li>It does not score people or create HR analytics.</li><li>It does not write code or approve its own draft.</li><li>Your speech and code are not used for model training.</li></ul></section>
-    <section class="pricing" aria-labelledby="pricing-title"><div><p class="eyebrow">Pro plan</p><h2 id="pricing-title">Private transcription for ongoing team work</h2><p>Free includes manual transcripts, review, repository links, and export.</p></div><div class="fare"><p><strong>$12</strong> / user / month</p><ul><li>Packaged local transcription model</li><li>Local model updates</li><li>Integration updates</li></ul><a class="button primary" href="${checkoutUrl}">Buy Pro</a><button class="text-button" data-action="show-license">Have a license? Paste it</button><form class="license-form" hidden><label for="license-token">License token</label><div><input id="license-token" autocomplete="off"><button class="button secondary" type="submit">Verify license</button></div></form><p class="fine">Sociobot is the merchant of record. See <a class="route-link" href="/terms">terms</a>.</p></div></section>
-    <section class="download" aria-labelledby="download-title"><div><p class="eyebrow">Desktop app</p><h2 id="download-title">Install on your computer</h2><p id="platform-note">Checking the latest desktop package…</p></div><a class="button secondary" id="download-link" href="https://github.com/B-Divyesh/sf-spoken-dev-brief/releases">View releases</a><p class="fine">Current v1 packages are unsigned. Your operating system may ask you to confirm.</p></section>
+    <section class="pricing" aria-labelledby="pricing-title"><div><p class="eyebrow">Pro plan</p><h2 id="pricing-title">Private transcription for ongoing team work</h2><p>Free includes manual transcripts, review, repository links, and export.</p></div><div class="fare"><p><strong>$12</strong> / user / month</p><ul><li>Packaged local transcription model</li><li>Manual transcript workflow stays free</li><li>Restore an existing license</li></ul><a class="button primary unavailable" href="${checkoutUrl}" aria-disabled="true" aria-describedby="checkout-note" data-action="checkout-unavailable">Checkout unavailable</a><button class="text-button" data-action="show-license">Have a license? Paste it</button><p class="fine" id="checkout-note">Purchase registration is pending. Existing licenses can still be verified.</p><form class="license-form" hidden><label for="license-token">License token</label><div><input id="license-token" autocomplete="off"><button class="button secondary" type="submit">Verify license</button></div></form><p class="fine">Sociobot will be the merchant of record. See <a class="route-link" href="/terms">terms</a>.</p></div></section>
+    <section class="download" aria-labelledby="download-title"><div><p class="eyebrow">Desktop app</p><h2 id="download-title">Install on your computer</h2><p id="platform-note">Checking the latest desktop package…</p><p class="install-commands"><code>curl -fsSL https://spoken-dev-brief.sociobot.in/install.sh | sh</code><code>irm https://spoken-dev-brief.sociobot.in/install.ps1 | iex</code></p></div><a class="button secondary" id="download-link" href="https://github.com/B-Divyesh/sf-spoken-dev-brief/releases">View releases</a><p class="fine">Current v1 packages are unsigned. Your operating system may ask you to confirm.</p></section>
   `, 'Spoken Dev Brief — Turn speech into code-linked briefs', 'Record implementation talk, confirm each decision, and export a code-linked engineering brief without sending audio away.');
 }
 
@@ -66,6 +81,7 @@ function appView() {
   const brief = s.loadBrief();
   const settings = s.settings();
   return shell(`
+    ${s.recoveryNotice ? `<p class="recovery-notice" role="alert">${escapeHtml(s.recoveryNotice)}</p>` : ''}
     <section class="workspace-head"><div><p class="eyebrow">Decision workspace</p><h1 tabindex="-1">Review a spoken engineering brief</h1><p>${isDemo() ? 'This sample uses a realistic sync-policy discussion.' : 'Record locally or paste a transcript to start.'}</p></div><ol class="stage-rail" aria-label="Workflow"><li class="done">Capture</li><li class="current">Draft</li><li>Confirm</li><li>Export</li></ol></section>
     <section class="workspace-grid">
       <aside class="capture-panel" aria-labelledby="capture-title">
@@ -93,7 +109,8 @@ function briefEditor(brief: Brief) {
     ${list('decisions', 'Decisions')}${list('assumptions', 'Assumptions')}${list('questions', 'Open questions')}
     <fieldset><legend>Repository references</legend>${brief.references.map((ref, i) => `<div class="ref-row"><input data-ref="path" data-index="${i}" value="${escapeHtml(ref.path)}" aria-label="Repository path ${i + 1}"><input data-ref="note" data-index="${i}" value="${escapeHtml(ref.note)}" aria-label="Repository note ${i + 1}"><button class="icon-button" data-action="remove-ref" data-index="${i}" aria-label="Remove repository reference ${i + 1}">×</button></div>`).join('')}<button class="text-button" data-action="add-ref">+ Add repository path</button></fieldset>
     <div class="confirm-row"><label><input type="checkbox" id="reviewed" ${brief.status === 'confirmed' ? 'checked disabled' : ''}> I checked this brief against the recording.</label><button class="button primary" data-action="confirm" ${brief.status === 'confirmed' ? 'disabled' : ''}>Confirm brief</button></div>
-    <div class="export-row"><button class="button secondary" data-action="markdown">Download Markdown</button><button class="button secondary" data-action="jira">Copy Jira text</button></div>`;
+    <p class="export-help" id="export-help">${brief.status === 'confirmed' ? 'This confirmed brief is ready to export.' : 'Confirm this brief before exporting it.'}</p>
+    <div class="export-row"><button class="button secondary" data-action="markdown" aria-describedby="export-help" ${brief.status === 'confirmed' ? '' : 'disabled'}>Download Markdown</button><button class="button secondary" data-action="jira" aria-describedby="export-help" ${brief.status === 'confirmed' ? '' : 'disabled'}>Copy Jira text</button></div>`;
 }
 
 function settingsForm(settings: Settings) {
@@ -102,7 +119,7 @@ function settingsForm(settings: Settings) {
 
 function policyPage(kind: 'privacy' | 'terms') {
   const privacy = `<section class="legal"><p class="eyebrow">Policy</p><h1 tabindex="-1">Privacy in plain words</h1><p class="updated">Effective 2 September 2026</p><h2>Your device holds your work</h2><p>Recordings, transcripts, briefs, settings, and license tokens stay in app storage on your device.</p><h2>Local transcription</h2><p>The desktop app transcribes audio with its packaged model. It does not upload audio for local transcription.</p><h2>Model training</h2><p>Your speech and code are not sent for model training.</p><h2>Payments</h2><p>Sociobot and Dodo handle checkout, billing details, and refunds. This app stores only your license token and its last verification result.</p><h2>Delete your data</h2><p>Use Storage settings to set retention or delete local data immediately.</p><h2>Contact</h2><p>Email <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a> with privacy questions.</p></section>`;
-  const terms = `<section class="legal"><p class="eyebrow">Agreement</p><h1 tabindex="-1">Terms of use</h1><p class="updated">Effective 2 September 2026</p><h2>Use recordings with consent</h2><p>You must have permission from everyone recorded. Do not use the app for covert recording.</p><h2>Review every brief</h2><p>Drafts can be wrong. A person must check a brief before relying on it.</p><h2>Free and Pro</h2><p>Core review and export tools are free. Pro costs $12 per user each month and includes local transcription model updates and integrations.</p><h2>Billing and refunds</h2><p>Sociobot and Dodo are the merchant of record. Refunds are handled through the hosted checkout service. A refunded or expired license stops Pro access.</p><h2>Warranty</h2><p>The software is provided as-is under the MIT license. Keep backups of records you need.</p><h2>Contact</h2><p>Email <a href="mailto:support@sociobot.in">support@sociobot.in</a> for help.</p></section>`;
+  const terms = `<section class="legal"><p class="eyebrow">Agreement</p><h1 tabindex="-1">Terms of use</h1><p class="updated">Effective 2 September 2026</p><h2>Use recordings with consent</h2><p>You must have permission from everyone recorded. Do not use the app for covert recording.</p><h2>Review every brief</h2><p>Drafts can be wrong. A person must check a brief before relying on it.</p><h2>Free and Pro</h2><p>Core review and export tools are free. Pro is listed at $12 per user each month.</p><p>New purchases are unavailable until checkout registration is complete.</p><h2>Billing and refunds</h2><p>Sociobot and Dodo will handle checkout, billing, and refunds after registration. A refunded or expired license stops Pro access.</p><h2>Warranty</h2><p>The software is provided as-is under the MIT license. Keep backups of records you need.</p><h2>Contact</h2><p>Email <a href="mailto:support@sociobot.in">support@sociobot.in</a> for help.</p></section>`;
   return shell(kind === 'privacy' ? privacy : terms, `${kind === 'privacy' ? 'Privacy' : 'Terms'} — Spoken Dev Brief`, kind === 'privacy' ? 'How Spoken Dev Brief stores recordings, transcripts, licenses, and optional online requests.' : 'Terms for recording consent, brief review, billing, and use of Spoken Dev Brief.');
 }
 
@@ -120,10 +137,16 @@ function render() {
 
 function saveEditor(): Brief | null {
   const s = store(); const brief = s.loadBrief(); if (!brief) return null;
+  const before = JSON.stringify({ title: brief.title, author: brief.author, decisions: brief.decisions, assumptions: brief.assumptions, questions: brief.questions, references: brief.references });
   brief.title = (document.querySelector<HTMLInputElement>('#brief-name')?.value || brief.title).trim();
   brief.author = (document.querySelector<HTMLInputElement>('#author')?.value || brief.author).trim();
   document.querySelectorAll<HTMLTextAreaElement>('[data-field]').forEach(el => { const key = el.dataset.field as 'decisions' | 'assumptions' | 'questions'; brief[key][Number(el.dataset.index)] = el.value.trim(); });
   document.querySelectorAll<HTMLInputElement>('[data-ref]').forEach(el => { const key = el.dataset.ref as 'path' | 'note'; brief.references[Number(el.dataset.index)][key] = el.value.trim(); });
+  const after = JSON.stringify({ title: brief.title, author: brief.author, decisions: brief.decisions, assumptions: brief.assumptions, questions: brief.questions, references: brief.references });
+  if (brief.status === 'confirmed' && before !== after) {
+    brief.status = 'draft';
+    delete brief.confirmedAt;
+  }
   s.saveBrief(brief); return brief;
 }
 
@@ -133,7 +156,12 @@ function bindEvents() {
   document.querySelectorAll<HTMLAnchorElement>('a.route-link').forEach(link => link.addEventListener('click', e => { if (!e.metaKey && !e.ctrlKey) { e.preventDefault(); navigate(new URL(link.href).pathname + new URL(link.href).hash); } }));
   document.querySelector('.license-form')?.addEventListener('submit', async e => { e.preventDefault(); const token = document.querySelector<HTMLInputElement>('#license-token')!.value; saveLicense(token); notify(await verifyLicense() ? 'License verified. Pro is active.' : 'That license is not active. Check the token and try again.'); });
   document.querySelector('#settings-form')?.addEventListener('submit', e => { e.preventDefault(); const form = e.currentTarget as HTMLFormElement; const fd = new FormData(form); store().saveSettings({ author: String(fd.get('author') || ''), retentionDays: Number(fd.get('retentionDays')), deleteAudioAfterTranscription: fd.get('deleteAudio') === 'on' }); notify('Settings saved on this device.'); });
-  document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('.brief-editor input, .brief-editor textarea').forEach(el => el.addEventListener('change', saveEditor));
+  document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('.brief-editor input, .brief-editor textarea').forEach(el => el.addEventListener('change', () => {
+    const before = store().loadBrief()?.status;
+    const saved = saveEditor();
+    if (before === 'confirmed' && saved?.status === 'draft') { render(); notify('The brief changed. Confirm it again before exporting.'); }
+  }));
+  document.querySelector<HTMLElement>('[data-action="checkout-unavailable"]')?.addEventListener('click', event => event.preventDefault());
   document.querySelectorAll<HTMLElement>('[data-action]').forEach(el => el.addEventListener('click', () => void handleAction(el.dataset.action!, el)));
 }
 
@@ -142,6 +170,7 @@ async function handleAction(action: string, el: HTMLElement) {
   if (action === 'reset-demo') { s.reset(); render(); notify('Demo reset to the sample brief.'); }
   if (action === 'start-real') { s.reset(); navigate('/app'); }
   if (action === 'show-license') { document.querySelector<HTMLFormElement>('.license-form')!.hidden = false; document.querySelector<HTMLInputElement>('#license-token')!.focus(); }
+  if (action === 'checkout-unavailable') notify('Checkout is not available yet. Purchase registration is pending.');
   if (action === 'focus-transcript') document.querySelector<HTMLTextAreaElement>('#transcript')?.focus();
   if (action === 'draft') { const transcript = document.querySelector<HTMLTextAreaElement>('#transcript')!.value.trim(); if (!transcript) { notify('No transcript was found. Paste some spoken words, then try again.'); return; } s.saveBrief(draftBrief(transcript, s.settings().author || 'Unassigned')); render(); notify('Draft created. Review each item before confirming.'); }
   if (action === 'add-item') { const b = saveEditor(); if (!b) return; b[el.dataset.field as 'decisions' | 'assumptions' | 'questions'].push(''); s.saveBrief(b); render(); }
@@ -149,8 +178,8 @@ async function handleAction(action: string, el: HTMLElement) {
   if (action === 'add-ref') { const b = saveEditor(); if (!b) return; b.references.push({ path: '', note: '' }); s.saveBrief(b); render(); }
   if (action === 'remove-ref') { const b = saveEditor(); if (!b) return; b.references.splice(Number(el.dataset.index), 1); s.saveBrief(b); render(); }
   if (action === 'confirm') { const reviewed = document.querySelector<HTMLInputElement>('#reviewed')!; if (!reviewed.checked) { notify('Confirmation is still unchecked. Review the brief, then check the box.'); reviewed.focus(); return; } const b = saveEditor(); if (!b) return; b.status = 'confirmed'; b.confirmedAt = new Date().toISOString(); s.saveBrief(b); render(); notify('Brief confirmed. It is ready to export.'); }
-  if (action === 'markdown') { const b = saveEditor(); if (!b) return; downloadText(`${slugify(b.title)}.md`, toMarkdown(b), 'text/markdown'); notify('Markdown brief downloaded.'); }
-  if (action === 'jira') { const b = saveEditor(); if (!b) return; await navigator.clipboard.writeText(toJira(b)); notify('Jira text copied.'); }
+  if (action === 'markdown') { const b = saveEditor(); if (!b || b.status !== 'confirmed') { render(); notify('Confirm the brief before downloading Markdown.'); return; } downloadText(`${slugify(b.title)}.md`, toMarkdown(b), 'text/markdown'); notify('Markdown brief downloaded.'); }
+  if (action === 'jira') { const b = saveEditor(); if (!b || b.status !== 'confirmed') { render(); notify('Confirm the brief before copying Jira text.'); return; } await navigator.clipboard.writeText(toJira(b)); notify('Jira text copied.'); }
   if (action === 'delete-data') { if (confirm('Delete all briefs and settings stored by this mode? This cannot be undone.')) { s.reset(); render(); notify('Local data deleted.'); } }
   if (action === 'record') await toggleRecording();
 }
@@ -181,7 +210,8 @@ async function toggleRecording() {
 
 async function resolveDownload() {
   const note = document.querySelector('#platform-note'); const link = document.querySelector<HTMLAnchorElement>('#download-link'); if (!note || !link) return;
-  const cached = localStorage.getItem('release:spoken-dev-brief'); let release: { at: number; data: any } | null = cached ? JSON.parse(cached) : null;
+  let release: { at: number; data: any } | null = null;
+  try { const cached = localStorage.getItem('release:spoken-dev-brief'); release = cached ? JSON.parse(cached) : null; } catch { localStorage.removeItem('release:spoken-dev-brief'); }
   try { if (!release || Date.now() - release.at > 3_600_000) { const response = await fetch('https://api.github.com/repos/B-Divyesh/sf-spoken-dev-brief/releases?per_page=1'); if (!response.ok) throw new Error(); const releases = await response.json() as any[]; if (!releases[0]) { note.textContent = 'Downloads are being published. Open Releases to check again.'; return; } release = { at: Date.now(), data: releases[0] }; localStorage.setItem('release:spoken-dev-brief', JSON.stringify(release)); }
     const platform = /Win/i.test(navigator.userAgent) ? 'windows' : /Mac/i.test(navigator.userAgent) ? 'macOS' : 'Linux'; const pattern = platform === 'windows' ? /\.(msi|exe)$/i : platform === 'macOS' ? /\.(dmg|app\.tar\.gz)$/i : /\.(AppImage|deb)$/i; const asset = release.data.assets?.find((x: any) => pattern.test(x.name)); note.textContent = asset ? `Latest package for ${platform}: ${asset.name}` : `Downloads for ${platform} are being published.`; if (asset) { link.href = asset.browser_download_url; link.textContent = `Download for ${platform}`; }
   } catch { note.textContent = 'Downloads are being published. Open Releases to check again.'; }
@@ -189,7 +219,13 @@ async function resolveDownload() {
 
 captureLicense();
 if (import.meta.env.MODE === 'desktop' && route() === '/') history.replaceState({}, '', '/app');
-window.addEventListener('popstate', render);
+history.scrollRestoration = 'manual';
+history.replaceState({ ...history.state, scrollX: scrollX, scrollY: scrollY }, '');
+window.addEventListener('popstate', event => {
+  render();
+  const state = event.state as { scrollX?: number; scrollY?: number } | null;
+  focusRouteHeading(state?.scrollX || 0, state?.scrollY || 0);
+});
 document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && route() === '/app') { e.preventDefault(); void handleAction('draft', document.body); } });
 render();
 if (cachedLicensed()) void verifyLicense();

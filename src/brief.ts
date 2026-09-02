@@ -2,6 +2,34 @@ import type { Brief } from './types';
 
 const clean = (line: string) => line.replace(/^[-*\d.)\s]+/, '').trim();
 
+const REPOSITORY_PATH = /(?:\.{0,2}\/)?(?:[A-Za-z0-9_@.-]+\/)+[A-Za-z0-9_@.-]+(?::\d+(?::\d+)?)?/g;
+
+function extractReferences(transcript: string): Brief['references'] {
+  const seen = new Set<string>();
+  const references: Brief['references'] = [];
+  for (const match of transcript.matchAll(REPOSITORY_PATH)) {
+    const path = match[0].replace(/[),.;]+$/, '');
+    if (!seen.has(path)) {
+      seen.add(path);
+      references.push({ path, note: 'Mentioned in transcript' });
+    }
+  }
+  return references.slice(0, 10);
+}
+
+function extractOwner(transcript: string, fallback: string): string {
+  const name = String.raw`(@?[A-Z][A-Za-z0-9_'’-]*(?:\s+[A-Z][A-Za-z0-9_'’-]*)?)`;
+  const patterns = [
+    new RegExp(String.raw`(?:owner(?:\s+is|\s*[:=-])|owned\s+by|assign(?:ed)?\s+to)\s+${name}`, 'i'),
+    new RegExp(String.raw`${name}\s+(?:owns\b|is\s+(?:the\s+)?owner\b|will\s+own\b)`),
+  ];
+  for (const pattern of patterns) {
+    const match = transcript.match(pattern);
+    if (match?.[1]) return match[1].replace(/^@/, '').trim();
+  }
+  return fallback;
+}
+
 export function draftBrief(transcript: string, author = 'Unassigned'): Brief {
   const sentences = transcript.split(/(?<=[.!?])\s+|\n+/).map(clean).filter(Boolean);
   const decisions: string[] = [];
@@ -20,18 +48,19 @@ export function draftBrief(transcript: string, author = 'Unassigned'): Brief {
   return {
     id: crypto.randomUUID(),
     title: titleSource.split(/\s+/).slice(0, 9).join(' '),
-    author,
+    author: extractOwner(transcript, author),
     createdAt: new Date().toISOString(),
     transcript,
     decisions: decisions.slice(0, 5),
     assumptions: assumptions.slice(0, 5),
     questions: questions.slice(0, 5),
-    references: [],
+    references: extractReferences(transcript),
     status: 'draft'
   };
 }
 
 export function toMarkdown(brief: Brief): string {
+  if (brief.status !== 'confirmed') throw new Error('Confirm the brief before exporting it.');
   const list = (items: string[]) => items.length ? items.map(x => `- ${x}`).join('\n') : '- None recorded';
   const refs = brief.references.length
     ? brief.references.map(r => `- \`${r.path}\`${r.note ? ` — ${r.note}` : ''}`).join('\n')
@@ -40,6 +69,7 @@ export function toMarkdown(brief: Brief): string {
 }
 
 export function toJira(brief: Brief): string {
+  if (brief.status !== 'confirmed') throw new Error('Confirm the brief before exporting it.');
   const section = (name: string, items: string[]) => `h2. ${name}\n${items.length ? items.map(x => `* ${x}`).join('\n') : '* None recorded'}`;
   return `h1. ${brief.title}\n_Status: ${brief.status} | Owner: ${brief.author}_\n\n${section('Decisions', brief.decisions)}\n\n${section('Assumptions', brief.assumptions)}\n\n${section('Open questions', brief.questions)}\n\n${section('Repository references', brief.references.map(r => `{{${r.path}}}${r.note ? ` — ${r.note}` : ''}`))}`;
 }

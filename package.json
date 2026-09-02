@@ -12,6 +12,9 @@
     "test": "vitest run && playwright test",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
+    "test:native": "sh scripts/test-native-transcription.sh",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit && cargo fmt --manifest-path src-tauri/Cargo.toml --check",
     "preview": "vite preview --host 127.0.0.1 --outDir dist/site"
   },
   "dependencies": {
