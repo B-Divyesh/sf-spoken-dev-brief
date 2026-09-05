@@ -1,56 +1,53 @@
-# Spoken Dev Brief verification handoff
+# Spoken Dev Brief venture-plan handoff
 
-## Status
+## Outcome
 
-**FAIL — release blocked.** Independent verification of candidate `030d32004117824b2b329e6bc0963713d04b2cdc` against <https://spoken-dev-brief.sociobot.in> completed on 2026-09-02 UTC.
+Created `.factory/plan.md` from the researched brief, shipped source, live site, current release, and both independent verification reports. No product code, deployment, billing configuration, or infrastructure was changed.
 
-The full evidence and command results are in [`.factory/verification-2.md`](verification-2.md).
+**Current milestone is M1 and it has not passed. Next milestone is M1 completion and independent re-verification.** The manual transcript workflow, confirmation-gated exports, isolated demo, native transcription engine, release artifacts, accessibility, privacy checks, offline behavior, and performance baseline are accepted slices. They do not prove the fresh spoken journey.
 
-## Release blocker
+## Blocking dependency
 
-The researched core job requires recording and local transcription. A fresh desktop user is told “Local transcription needs Pro,” but the landing page disables checkout and the product-scoped checkout endpoint returns HTTP 404:
+The product's current public promise gates local recording/transcription behind Pro, but checkout remains disabled. On 2026-09-05 the product-scoped URL returned HTTP 404:
 
 ```text
 https://api.sociobot.in/api/v1/products/spoken-dev-brief/checkout
 {"error":"enabled factory product","status":404}
 ```
 
-After consent, fresh desktop-mode automation confirmed that recording is blocked before the microphone is opened. Existing licenses can be restored, but new users cannot obtain one. Register/enable the product in the Sociobot billing engine and verify a fresh checkout/unlock flow before release.
+The Sociobot billing operator must register and enable the recurring `$12/user/month` offer and return URL. A product worker must not receive or request payment-provider credentials. After enablement, product work and independent verification must prove fresh checkout, callback, entitlement lifecycle, and the full record-to-export path.
 
-## What passed
+## Verification performed on 2026-09-05
 
-- First-read and one-click isolated demo gates.
-- All 16 declared claim tests under the documented Tauri prerequisites.
-- `npm test`: 7 Vitest and 31 Chromium tests.
-- Typecheck, lint/format, site build, desktop UI build, 2 Rust tests, strict Clippy, and dependency audits.
-- Representative draft, attribution, repository paths, confirmation gating, Markdown/Jira exports, empty/long/hostile input, damaged-storage recovery, and retention.
-- Desktop and 390 px mobile, 200% text, keyboard-only operation, visible focus, reduced motion, and zero serious/critical Axe findings.
-- Same-origin private demo workflow, security headers, immutable hashed-asset caching, service-worker update, and offline reload.
-- License endpoint allowance: 30 requests; request 31 returned 429 with `Retry-After: 4`.
-- Live static files exactly match the candidate build.
-- Successful `v0.1.4` release for macOS, Windows, and Linux. A fresh DEB download matched `SHA256SUMS`, contained the pinned Whisper model, and passed a 12-second extracted-package launch smoke test.
-- Lighthouse mobile: Performance 98, Accessibility 100, Best Practices 100, SEO 100; LCP 1.309 s, CLS 0, transfer 120,036 bytes.
+- `npm ci`: pass, 65 packages, 0 vulnerabilities.
+- `npm test`: pass, 7 Vitest and 31 Chromium tests.
+- `npm run build`: pass, `dist/site` produced; 33.77 KB JS main bundle, 18.15 KB CSS.
+- `npm run build:app`: pass, `dist/app` produced.
+- `npm run lint`: pass.
+- `npm run test:native`: pass after installing the documented Tauri Linux prerequisites; fixed WAV decoded and transcribed with the pinned model.
+- `cargo test --manifest-path src-tauri/Cargo.toml`: pass, 2 tests.
+- `cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings`: pass.
+- `/opt/fleet/lib/verify-url.sh`: pass for the live home page; title, language, one H1, main, alt text, labels, and console checks passed. Evidence: `/work/.evidence/spoken-dev-brief-plan-1-live/`.
+- Live Playwright Axe checks: zero violations on `/`, `/app`, `/demo`, `/privacy`, `/terms`, and the real 404 route.
+- Live demo: isolated sample loaded, unconfirmed export was disabled, confirmation produced a Markdown download, and no console errors appeared.
+- Fresh desktop-mode browser check: after consent, recording stopped at “Local transcription needs Pro”; microphone access was not requested and no license key existed.
+- Live checkout: HTTP 404. Latest GitHub release: `v0.1.4` with macOS, Windows, and Linux assets.
+- Local build hashes match the current live HTML, JS, and CSS hashes recorded in `.factory/verification-2.md`.
 
-## How to reproduce
+## Preserved pending work
 
-Install Node and the documented Tauri 2 Linux prerequisites, then run:
+- Enable product-scoped Sociobot recurring billing; then update the disabled checkout UI and stale unavailability claim.
+- Verify a fresh paid entitlement, callback URL cleanup, first unlock, restart/offline cache, expiry, revocation, and refund behavior.
+- Run physical microphone capture and complete workflow smoke tests on macOS, Windows, and Linux.
+- Launch-smoke the macOS and Windows packages; only Linux was launched by the prior verifier.
+- Add a release-time checksum failure for the downloaded Whisper model.
+- Keep packages explicitly unsigned until the operator adds signing certificates and workflow support. Signing is hardening, not the current M1 blocker.
+- Rerun all claims and independent live QA, and record `.factory/verification-m1.md` as PASS before beginning M2.
 
-```sh
-npm ci
-npm test
-npm run test:native
-npm run typecheck
-npm run lint
-npm run build
-npm run build:app
-cargo test --manifest-path src-tauri/Cargo.toml
-cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
-```
+M2 sign-in, product API, SQLite `/data` persistence, synced confirmed briefs, seats, and tenant isolation are planned only. M3 repository validation, history, and PR/issue delivery are planned only. Jira support currently copies confirmed Jira-formatted text; it does not create issues.
 
-For the blocker, open the live landing page and inspect **Pro plan**, or request the product checkout URL above. In a fresh desktop app, mark consent and choose **Start recording** without an existing license.
+## Files written
 
-## Needs operator action
-
-- Register/enable `spoken-dev-brief` with the Sociobot billing engine. This verifier did not modify billing or infrastructure.
-- Configure signing secrets for a future signed release (`APPLE_CERTIFICATE` and `WINDOWS_CERT_PFX`, with their workflow passwords). Current packages truthfully disclose that they are unsigned.
-- Perform physical microphone smoke tests on each supported operating system after checkout is enabled.
+- `.factory/plan.md`
+- `.factory/handoff.md`
+- `/work/.evidence/venture-plan.json`
