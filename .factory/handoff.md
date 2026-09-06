@@ -102,3 +102,26 @@ restart/offline cache, expiry, revocation, and refund.
 M2 accounts, product-owned SQLite under `/data`, sync, tenancy, and seats;
 and M3 repository validation/history/delivery are still planned only and were
 not started.
+
+## Verification 3 update (2026-09-06)
+
+Independent verification reviewed implementation
+`91006fd99730ff2adfb85cddba5002938f1eed13` and this documentation revision
+`a5ec963fd814dfacc16dfde68bcd6b260500791e`. The result is **FAIL** with one
+high, external finding and zero untested declared claims. See
+`.factory/verification-3.md`.
+
+The fresh desktop/phone first read, isolated populated demo/reset/real-data
+separation, all 16 claim commands, 8 Vitest plus 33 Chromium tests, native
+Whisper fixture, typecheck, lint, site/app builds, Rust test, strict Clippy,
+audits, live URL/accessibility checks, Lighthouse, live/build parity, rate
+limit behavior, and a clean Linux DEB checksum/launch smoke passed. The
+verifier installed the release workflow’s Linux Tauri prerequisites before
+running native checks.
+
+The billing endpoint is still the sole current blocker: product-scoped
+checkout returned HTTP 404, so a fresh user cannot get the license needed
+before microphone use. The operator must register the recurring USD 12/user/
+month offer and return URL before a fresh checkout/entitlement/physical
+microphone verification can complete M1. No product code was changed by this
+verification.
