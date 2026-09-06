@@ -10,6 +10,8 @@ Live site: <https://spoken-dev-brief.sociobot.in>
 
 Current release: `v0.1.4`
 
+Current implementation candidate: `91006fd99730ff2adfb85cddba5002938f1eed13` (deployed to the static site on 2026-09-06; no new desktop package tag).
+
 ## Milestone decision
 
 **Current milestone: M1 — local spoken brief. Status: IN PROGRESS, NOT PASSED.**
@@ -38,7 +40,7 @@ No M1–M3 milestone has passed as a whole. Passing parts of M1 remain useful ev
 | Desktop release artifacts | Accepted as published artifacts | Release `v0.1.4` has macOS arm64/x64, Windows x64, and Linux packages plus checksums. The Linux DEB was checksum-verified and launch-smoked. macOS and Windows were built on native CI but not launched by the verifier. |
 | Fresh microphone-to-brief journey | Not accepted | Recording is stopped before `getUserMedia` for an unlicensed user. A sample brief and a WAV fixture do not prove the real journey. |
 | Subscription checkout | Not implemented | The page truthfully says checkout is unavailable. The exact product endpoint currently returns 404. Displaying `$12/user/month` is not billing. |
-| Existing-license restoration | Demonstrated only | A fixture proves the UI accepts a valid response. Live verification handled an invalid token. No live valid entitlement or purchase callback was verified. |
+| Existing-license restoration | Demonstrated only | Fixture coverage proves pasted-license verification, checkout callback token storage/URL cleanup, and expired-license locking before microphone access. Live verification handled only an invalid token; no live valid entitlement or purchase callback was verified. |
 | Sign-in, accounts, team workspaces, and tenant isolation | Not implemented | There is no auth layer, product API, server database, or tenant model. Local storage prefixes do not prove tenant isolation. |
 | Direct issue-tracker delivery | Not implemented | Markdown download and Jira-formatted clipboard copy are the only exports. |
 | Pilot success target | Not measured | No evidence yet shows that 60% of pilot recordings become approved briefs or are used from a PR/issue within seven days. |
@@ -190,7 +192,7 @@ The demo/manual flow, 16 current claim tests, browser quality gates, native fixt
 ### Exact blockers and pending verification
 
 1. **Blocking external dependency — billing registration:** the Sociobot billing operator must enable the product-scoped recurring offer and return URL. Current live result: checkout HTTP 404. The product worker must not request or receive provider credentials.
-2. **Repository work after enablement:** change the disabled checkout presentation only after the endpoint works; replace the current `pro-price` unavailability assertion with a truthful checkout/entitlement claim; cover callback token capture, URL stripping, valid/invalid/expired/revoked behavior, and daily caching.
+2. **Repository work after enablement:** callback token capture, URL stripping, fixture valid/expired handling, daily caching, and pre-microphone locking are now covered by the candidate. Change the disabled checkout presentation only after the endpoint works; replace the current `pro-price` unavailability assertion with a real checkout/entitlement claim; independently cover live valid, expired, revoked, and refund results.
 3. **Real paid journey:** independently verify a fresh subscription/entitlement, first unlock, restart, offline cached first paint, background reconciliation, and loss of access after a non-active verdict. Fixture-only verification is insufficient.
 4. **Physical capture:** smoke-test real microphone permission, start/stop, local transcription, correction, draft, confirmation, and export on supported macOS, Windows, and Linux installs. The current WAV test is necessary but not sufficient.
 5. **Package launch coverage:** launch the produced macOS and Windows packages. The Linux DEB has already passed a launch smoke.
@@ -317,7 +319,7 @@ Each dependency is listed separately so an available service cannot mask an unav
 | GitHub public release-metadata API | **M1 available.** | `api.github.com` supplies the latest asset list to the landing page; the UI retains a calm cached/fallback state. |
 | GitHub Actions native runners | **M1 available.** | Product repository workflow builds arm64/x64 macOS, x64 Windows, and x64 Linux artifacts. |
 | GitHub Releases asset hosting | **M1 available.** | Hosts versioned packages, `SHA256SUMS`, and `latest.json`; installers verify downloaded hashes. |
-| Hugging Face Whisper model source | **M1 available, integrity repair pending.** | Build downloads `ggml-tiny.en.bin`; the release workflow must enforce the pinned SHA-256 before packaging. |
+| Hugging Face Whisper model source | **M1 available; integrity check enforced.** | The release workflow downloads `ggml-tiny.en.bin` and runs `scripts/verify-whisper-model.sh` against the pinned SHA-256 before packaging. A regression proves altered model bytes are rejected. |
 | Sociobot Entra CIAM registration | **M2 future; unavailable and unimplemented.** | Identity operator creates only this product's public client/API registration, redirect URIs, audience, and scopes. |
 | Product API and durable mount | **M2 future; not provisioned.** | Factory creates only `sf-spoken-dev-brief-api`, pins one replica, and mounts its own `/data` for SQLite. |
 | Sociobot workspace-seat entitlement contract | **M2 future; not implemented.** | Billing service returns product-scoped recurring subscription and seat status to the product API; Dodo remains indirect. |
@@ -340,7 +342,7 @@ There is no current or planned M1–M3 dependency on messaging, HMRC access, sha
 | Tenant filters regress. | Run two-tenant denial tests against every endpoint and migration in CI; no M2 pass without full coverage. |
 | LocalStorage cannot support history or migration safely. | Before M2 history work, migrate copies in a disposable profile, verify rollback/export, and choose a desktop SQLite store if measured volume exceeds safe WebView storage. |
 | Unsigned packages suppress adoption. | Record install completion by opt-in pilot report. If OS warnings cause material drop-off, operator signing becomes a release gate. |
-| Upstream model download changes or disappears. | Verify SHA-256 in CI before every package build and test failure on a mismatched fixture. |
+| Upstream model download changes or disappears. | The release workflow now verifies SHA-256 before every package build; a regression tests failure on mismatched bytes. |
 
 ## Evidence index
 
