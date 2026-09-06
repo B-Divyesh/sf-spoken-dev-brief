@@ -118,3 +118,25 @@ test('@claim:license-verify restores a valid license', async ({ page }) => {
   await page.getByLabel('License token').fill('test-license'); await page.getByRole('button', { name: 'Verify license' }).click();
   await expect(page.getByRole('status')).toContainText('License verified');
 });
+
+test('a checkout callback stores the license, removes it from the address, and verifies it', async ({ page }) => {
+  await page.route('https://api.sociobot.in/api/v1/products/spoken-dev-brief/verify?license=callback-license', route => route.fulfill({ json: { valid: true, reason: 'ok', expires_at: '2026-10-01' } }));
+  await page.goto('/?license=callback-license');
+  await expect(page).toHaveURL('http://127.0.0.1:4173/');
+  await expect(page.getByRole('status')).toContainText('License verified. Pro is active.');
+  expect(await page.evaluate(() => localStorage.getItem('sb_license:spoken-dev-brief'))).toBe('callback-license');
+});
+
+test('an expired license stays locked before microphone access', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, '__TAURI_INTERNALS__', { value: {} });
+    localStorage.setItem('sb_license:spoken-dev-brief', 'expired-license');
+    Object.defineProperty(navigator, 'mediaDevices', { value: { getUserMedia: () => { sessionStorage.setItem('microphone-called', 'yes'); return Promise.resolve({}); } } });
+  });
+  await page.route('https://api.sociobot.in/api/v1/products/spoken-dev-brief/verify?license=expired-license', route => route.fulfill({ json: { valid: false, reason: 'expired', expires_at: '2026-08-01' } }));
+  await page.goto('/app');
+  await page.getByLabel('Everyone present has agreed to this recording.').check();
+  await page.getByRole('button', { name: 'Start recording' }).click();
+  await expect(page.getByRole('status')).toContainText('license is no longer active');
+  expect(await page.evaluate(() => sessionStorage.getItem('microphone-called'))).toBeNull();
+});

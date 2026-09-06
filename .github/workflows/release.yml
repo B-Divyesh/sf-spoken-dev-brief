@@ -35,7 +35,9 @@ jobs:
       - run: npm ci
       - name: Download local transcription model
         shell: bash
-        run: curl -fL --retry 3 https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en.bin -o src-tauri/resources/models/ggml-tiny.en.bin
+        run: |
+          curl -fL --retry 3 https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en.bin -o src-tauri/resources/models/ggml-tiny.en.bin
+          scripts/verify-whisper-model.sh
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -24,10 +24,6 @@ if [ "$actual" != "$expected" ]; then
   trap - EXIT INT TERM
 fi
 
-actual="$(sha256sum "$model" | cut -d ' ' -f 1)"
-if [ "$actual" != "$expected" ]; then
-  echo "The packaged model checksum does not match." >&2
-  exit 1
-fi
+scripts/verify-whisper-model.sh
 
 cargo test --manifest-path src-tauri/Cargo.toml --lib tests::local_transcription_core -- --exact

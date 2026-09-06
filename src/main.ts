@@ -2,7 +2,7 @@ import './style.css';
 import { draftBrief, toJira, toMarkdown } from './brief';
 import { LocalStore } from './store';
 import type { Brief, Settings } from './types';
-import { cachedLicensed, captureLicense, checkoutUrl, saveLicense, verifyLicense } from './license';
+import { cachedLicensed, captureLicense, checkoutUrl, saveLicense, verifyLicense, type LicenseStatus } from './license';
 
 declare global { interface Window { __TAURI_INTERNALS__?: unknown } }
 
@@ -153,7 +153,12 @@ function notify(message: string) { flash = message; const toast = document.query
 
 function bindEvents() {
   document.querySelectorAll<HTMLAnchorElement>('a.route-link').forEach(link => link.addEventListener('click', e => { if (!e.metaKey && !e.ctrlKey) { e.preventDefault(); navigate(new URL(link.href).pathname + new URL(link.href).hash); } }));
-  document.querySelector('.license-form')?.addEventListener('submit', async e => { e.preventDefault(); const token = document.querySelector<HTMLInputElement>('#license-token')!.value; saveLicense(token); notify(await verifyLicense() ? 'License verified. Pro is active.' : 'That license is not active. Check the token and try again.'); });
+  document.querySelector('.license-form')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const token = document.querySelector<HTMLInputElement>('#license-token')!.value;
+    saveLicense(token);
+    announceLicense(await verifyLicense());
+  });
   document.querySelector('#settings-form')?.addEventListener('submit', e => { e.preventDefault(); const form = e.currentTarget as HTMLFormElement; const fd = new FormData(form); store().saveSettings({ author: String(fd.get('author') || ''), retentionDays: Number(fd.get('retentionDays')), deleteAudioAfterTranscription: fd.get('deleteAudio') === 'on' }); notify('Settings saved on this device.'); });
   document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('.brief-editor input, .brief-editor textarea').forEach(el => el.addEventListener('change', () => {
     const before = store().loadBrief()?.status;
@@ -199,12 +204,32 @@ async function toggleRecording() {
   if (!recorder) {
     if (!document.querySelector<HTMLInputElement>('#consent')!.checked) { notify('Consent is not marked. Ask everyone, then check the consent box.'); return; }
     if (!window.__TAURI_INTERNALS__) { notify('Microphone transcription runs in the installed desktop app. Paste a transcript in this browser.'); return; }
-    if (!cachedLicensed() && !await verifyLicense()) { notify('Local transcription needs Pro. Paste a transcript for free or add your license from the home page.'); return; }
+    if (!cachedLicensed()) {
+      const license = await verifyLicense();
+      if (!license.valid) {
+        if (license.reason === 'invalid' || license.reason === 'expired' || license.reason === 'revoked' || license.reason === 'wrong_product') announceLicense(license);
+        else notify('Local transcription needs Pro. Paste a transcript for free or add your license from the home page.');
+        return;
+      }
+    }
     try { recorder = new LocalRecorder(); await recorder.start(); button.classList.add('recording'); button.innerHTML = '<span aria-hidden="true"></span>Stop and transcribe'; status.textContent = 'Recording on this device. Stop when the decision is complete.'; } catch { recorder = null; notify('The microphone could not start. Allow microphone access, then try again.'); }
   } else {
     button.disabled = true; status.textContent = 'Transcribing on this device…';
     try { const wav = await recorder.stop(); recorder = null; const { invoke } = await import('@tauri-apps/api/core'); const transcript = await invoke<string>('transcribe_wav', { wavBytes: wav }); document.querySelector<HTMLTextAreaElement>('#transcript')!.value = transcript; status.textContent = 'Local transcription complete. Review the words before drafting.'; button.disabled = false; button.classList.remove('recording'); button.innerHTML = '<span aria-hidden="true"></span>Start recording'; } catch { recorder = null; button.disabled = false; status.textContent = 'Transcription stopped. Paste a transcript or check the local model installation.'; notify('Local transcription did not finish. Check the model, then try again.'); }
   }
+}
+
+function announceLicense(status: LicenseStatus) {
+  if (status.valid) {
+    notify(status.reason === 'offline' ? 'Pro is active from this device while verification is offline.' : 'License verified. Pro is active.');
+    return;
+  }
+  if (status.reason === 'missing') return;
+  if (status.reason === 'offline') {
+    notify('License verification is offline. Connect to the internet, then try again.');
+    return;
+  }
+  notify('This license is no longer active. Paste another license or check your plan.');
 }
 
 async function resolveDownload() {
@@ -216,7 +241,7 @@ async function resolveDownload() {
   } catch { note.textContent = 'Downloads are being published. Open Releases to check again.'; }
 }
 
-captureLicense();
+const licenseFromCallback = captureLicense();
 if (import.meta.env.MODE === 'desktop' && route() === '/') history.replaceState({}, '', '/app');
 history.scrollRestoration = 'manual';
 history.replaceState({ ...history.state, scrollX: scrollX, scrollY: scrollY }, '');
@@ -227,5 +252,5 @@ window.addEventListener('popstate', event => {
 });
 document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && route() === '/app') { e.preventDefault(); void handleAction('draft', document.body); } });
 render();
-if (cachedLicensed()) void verifyLicense();
+if (licenseFromCallback || cachedLicensed()) void verifyLicense().then(announceLicense);
 if ('serviceWorker' in navigator && !window.__TAURI_INTERNALS__) window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => undefined));
